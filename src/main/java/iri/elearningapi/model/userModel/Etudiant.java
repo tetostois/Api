@@ -1,6 +1,9 @@
 package iri.elearningapi.model.userModel;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +22,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import iri.elearningapi.model.Region;
 import iri.elearningapi.model.courModel.EtudiantChapitre;
@@ -78,9 +82,12 @@ public class Etudiant implements Serializable {
 
 	private String nom;
 
+	/** Non inclus dans les réponses JSON ; toujours accepté à la création / mise à jour. */
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
 	
 	@Column(name="password_clear")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String passwordClear;
 
 	@Transient
@@ -172,6 +179,23 @@ public class Etudiant implements Serializable {
 
 	public void setDateNaissance(Date dateNaissance) {
 		this.dateNaissance = dateNaissance;
+	}
+
+	/**
+	 * Âge en années (non persisté), calculé pour les réponses JSON (ex. liste admin).
+	 */
+	@Transient
+	@JsonProperty
+	public Integer getAge() {
+		if (dateNaissance == null) {
+			return null;
+		}
+		try {
+			LocalDate birth = dateNaissance.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			return Period.between(birth, LocalDate.now()).getYears();
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	public String getEmail() {

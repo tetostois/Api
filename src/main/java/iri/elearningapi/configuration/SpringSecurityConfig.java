@@ -58,6 +58,8 @@ public class SpringSecurityConfig {
                 .authorizeRequests(auth -> auth
                     .antMatchers("/image/article/**").permitAll() // Permettre l'accès public aux images d'articles
                     .antMatchers("/public/**").permitAll() // Permettre l'accès public aux endpoints publics
+                    // Fichiers vidéo servis par MediaResourceConfig (lecteur <video> / ReactPlayer sans Basic Auth)
+                    .antMatchers("/videos/**").permitAll()
                     .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

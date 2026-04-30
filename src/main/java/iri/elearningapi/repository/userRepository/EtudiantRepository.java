@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import iri.elearningapi.model.userModel.Etudiant;
@@ -32,7 +34,9 @@ public interface EtudiantRepository extends JpaRepository<Etudiant, Integer> {
 	Page<Etudiant> findByNomContainingOrPrenomContainingOrRegionContainingOrEmailContainingOrNomEntrepriseContainingOrderByNomAsc(String nom, String prenom, String region, String email, String nomEntreprise, Pageable pageable);
 
 	Etudiant findByEmailOrTelephoneAndPassword(String email,String telephone,String password);
-	Etudiant findByEmailOrTelephone(String email,String telephone);
+
+	@Query("SELECT e FROM Etudiant e WHERE e.email = :login OR e.telephone = :login")
+	Etudiant findByEmailOrTelephone(@Param("login") String login);
 	Etudiant findByPassword(String password);
 	
 	Etudiant findByLienConfirmation(String lienConfirmation);

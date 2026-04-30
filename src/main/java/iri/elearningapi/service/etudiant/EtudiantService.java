@@ -144,17 +144,37 @@ public class EtudiantService {
 		return user;
 	}
 
+	/** Email, téléphone ou champ login (JSON peut n’envoyer que « email »). */
+	private String resolveIdentifiantConnexion(UserElearning userLogin) {
+		if (userLogin == null) {
+			return null;
+		}
+		if (userLogin.getLogin() != null && !userLogin.getLogin().trim().isEmpty()) {
+			return userLogin.getLogin().trim();
+		}
+		if (userLogin.getEmail() != null && !userLogin.getEmail().trim().isEmpty()) {
+			return userLogin.getEmail().trim();
+		}
+		if (userLogin.getTelephone() != null && !userLogin.getTelephone().trim().isEmpty()) {
+			return userLogin.getTelephone().trim();
+		}
+		return null;
+	}
+
 	public UserElearning getLogin(UserElearning userLogin) {
 		Etudiant etudiant = null;
-		Etudiant etudiant2 = null;
-		etudiant = etudiantRepository.findByEmailOrTelephone(userLogin.getLogin(), userLogin.getLogin());
+		String identifiant = resolveIdentifiantConnexion(userLogin);
+		if (identifiant == null || identifiant.isBlank()) {
+			return null;
+		}
+		etudiant = etudiantRepository.findByEmailOrTelephone(identifiant);
 		// ancien code utiliser pour verifier que le login et le mot de passe etait
 		// correct derenavent on cotrole juste si le login est correct,
 		// etudiant2 =
 		// etudiantRepository.findByPassword(Cryptage.getMd5(userLogin.getPassword()));
 		// if (etudiant != null && etudiant2 != null && etudiant.getId() ==
 		// etudiant2.getId()) {
-		if (etudiant != null && etudiantRepository.existsByMatricule(etudiant.getMatricule())) {
+		if (etudiant != null && etudiant.getMatricule() != null && !etudiant.getMatricule().isBlank()) {
 			UserElearning user = new UserElearning();
 			user.setEmail(etudiant.getEmail());
 			user.setId(etudiant.getId());

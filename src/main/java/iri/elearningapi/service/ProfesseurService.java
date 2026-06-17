@@ -271,19 +271,26 @@ public class ProfesseurService {
 			dashboard.setModules(modulesAssigned);
 			dashboard.setModuleTotal(modulesAssigned.size());
 			
-			// Compter les QRO en attente (sans réponse du professeur)
 			int qroEnAttente = 0;
 			int qroTotal = 0;
+			java.util.Set<Integer> etudiantIds = new java.util.HashSet<>();
 			for (Module module : modulesAssigned) {
 				if (module.getChapitres() != null) {
 					for (Chapitre chapitre : module.getChapitres()) {
 						if (chapitre.getQros() != null) {
 							for (Qro qro : chapitre.getQros()) {
 								if (qro.getQroEtudiants() != null) {
-									qroTotal += qro.getQroEtudiants().size();
-									// Pour l'instant, on considère tous les QRO comme en attente
-									// On pourra ajouter un champ pour marquer ceux qui ont une réponse
-									qroEnAttente += qro.getQroEtudiants().size();
+									boolean professeurADejaRepondu = qro.getNote() != null
+											&& qro.getNote().contains("[Professeur]:");
+									for (QroEtudiant qroEtudiant : qro.getQroEtudiants()) {
+										qroTotal++;
+										if (qroEtudiant.getEtudiant() != null) {
+											etudiantIds.add(qroEtudiant.getEtudiant().getId());
+										}
+										if (!professeurADejaRepondu) {
+											qroEnAttente++;
+										}
+									}
 								}
 							}
 						}
@@ -292,6 +299,7 @@ public class ProfesseurService {
 			}
 			dashboard.setQroTotal(qroTotal);
 			dashboard.setQroEnAttente(qroEnAttente);
+			dashboard.setEtudiantTotal(etudiantIds.size());
 		}
 		
 		return dashboard;
